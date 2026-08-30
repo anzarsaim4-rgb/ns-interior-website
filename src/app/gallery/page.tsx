@@ -75,22 +75,31 @@ export default function GalleryPage() {
     }
   };
 
-  const handleDelete = async (imageName: string) => {
-    try {
-      const response = await fetch(`/api/gallery?name=${encodeURIComponent(imageName)}`, {
+  const handleDelete = async (imageUrl: string) => {
+  try {
+    const response = await fetch(
+      `/api/gallery?url=${encodeURIComponent(imageUrl)}`,
+      {
         method: 'DELETE',
-      });
-
-      const data = await response.json();
-      if (!response.ok || !data.success) {
-        throw new Error(data.message || 'Delete failed');
       }
+    );
 
-      setImages(data.images || []);
-    } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : 'Unable to delete image.');
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.message || 'Delete failed');
     }
-  };
+
+    setImages(data.images || []);
+    setErrorMessage('');
+  } catch (error) {
+    setErrorMessage(
+      error instanceof Error
+        ? error.message
+        : 'Unable to delete image.'
+    );
+  }
+};
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">

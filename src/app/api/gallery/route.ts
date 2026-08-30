@@ -1,98 +1,175 @@
+import { del, list, put } from '@vercel/blob';
 import { NextResponse } from 'next/server';
-import { mkdir, readdir, unlink, writeFile } from 'fs/promises';
-import path from 'path';
 
-const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'gallery');
+const GALLERY_PREFIX = 'gallery/';
 
-function getGalleryUrls(files: string[]) {
-  return files
-    .filter((file) => /\.(png|jpe?g|webp|gif)$/i.test(file))
-    .map((file) => `/uploads/gallery/${file}`)
-    .sort((a, b) => b.localeCompare(a));
+function getGalleryUrls(blobs: Array<{ url: string; pathname: string }>) {
+  return blobs
+    .filter((blob) => /\.(png|jpe?g|webp|gif)$/i.test(blob.pathname))
+    .sort((a, b) => b.pathname.localeCompare(a.pathname))
+    .map((blob) => blob.url);
+}
+
+async function getGalleryImages() {
+  const result = await list({
+    prefix: GALLERY_PREFIX,
+    limit: 1000,
+  });
+
+  return getGalleryUrls(result.blobs);
 }
 
 export async function GET() {
   try {
-    await mkdir(uploadDir, { recursive: true });
-    const files = await readdir(uploadDir, { withFileTypes: true });
-    const imageNames = files
-      .filter((file) => file.isFile())
-      .map((file) => file.name);
+    const images = await getGalleryImages();
 
-    return NextResponse.json({ success: true, images: getGalleryUrls(imageNames) });
+    return NextResponse.json({
+      success: true,
+      images,
+    });
   } catch (error) {
     console.error('Gallery fetch error:', error);
-    return NextResponse.json({ success: true, images: [] });
+
+    return NextResponse.json(
+      {
+        success: false,
+        images: [],
+        message: 'Unable to load gallery',
+      },
+      { status: 500 }
+    );
   }
 }
 
 export async function POST(request: Request) {
   try {
     const formData = await request.formData();
-    const files = formData.getAll('images') as File[];
+    const files = formData.getAll('images');
 
     if (!files.length) {
-      return NextResponse.json({ success: false, message: 'No files selected' }, { status: 400 });
+      return NextResponse.json(
+        {
+          success: false,
+          message: 'No files selected',
+        },
+        { status: 400 }
+      );
     }
 
-    await mkdir(uploadDir, { recursive: true });
-    const savedFiles: string[] = [];
+    const uploadedUrls: string[] = [];
 
-    for (const file of files) {
-      if (!(file instanceof File) || file.size === 0 || !file.type.startsWith('image/')) {
+    for (const item of files) {
+      if (!(item instanceof File)) {
         continue;
       }
 
-      const originalName = file.name || `gallery-${Date.now()}.jpg`;
-      const extension = originalName.includes('.') ? `.${originalName.split('.').pop()}` : '.jpg';
-      const safeName = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}${extension}`;
-      const filePath = path.join(uploadDir, safeName);
-      const buffer = Buffer.from(await file.arrayBuffer());
+      if (item.size === 0) {
+        continue;
+      }
 
-      await writeFile(filePath, buffer);
-      savedFiles.push(safeName);
+      if (!item.type.startsWith('image/')) {
+        continue;
+      }
+
+      const originalName = item.name || `gallery-${Date.now()}.jpg`;
+
+      const extension =
+        originalName.includes('.')
+          ? `.${originalName.split('.').pop()}`
+          : '.jpg';
+
+      const safeBaseName = originalName
+        .replace(/\.[^/.]+$/, '')
+        .replace(/[^a-zA-Z0-9-_]/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-|-$/g, '')
+        .slice(0, 80);
+
+      const pathname = `${GALLERY_PREFIX}${safeBaseName || 'project'}-${Date.now()}-${Math.random()
+        .toString(36)
+        .slice(2, 8)}${extension}`;
+
+      const blob = await put(pathname, item, {
+        access: 'public',
+        addRandomSuffix: false,
+        contentType: item.type,
+        cacheControlMaxAge: 31536000,
+      });
+
+      uploadedUrls.push(blob.url);
     }
 
-    if (!savedFiles.length) {
-      return NextResponse.json({ success: false, message: 'No valid image files were uploaded' }, { status: 400 });
+    if (!uploadedUrls.length) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: 'No valid image files were uploaded',
+        },
+        { status: 400 }
+      );
     }
 
-    const allFiles = await readdir(uploadDir, { withFileTypes: true });
-    const allImageNames = allFiles
-      .filter((file) => file.isFile())
-      .map((file) => file.name);
+    const images = await getGalleryImages();
 
-    return NextResponse.json({ success: true, images: getGalleryUrls(allImageNames) });
+    return NextResponse.json({
+      success: true,
+      images,
+    });
   } catch (error) {
     console.error('Gallery upload error:', error);
-    return NextResponse.json({ success: false, message: 'Unable to upload files' }, { status: 500 });
+
+    return NextResponse.json(
+      {
+        success: false,
+        message: 'Unable to upload files',
+      },
+      { status: 500 }
+    );
   }
 }
 
 export async function DELETE(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const imageName = searchParams.get('name');
+    const imageUrl = searchParams.get('url');
 
-    if (!imageName) {
-      return NextResponse.json({ success: false, message: 'No image selected for deletion' }, { status: 400 });
+    if (!imageUrl) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: 'No image selected for deletion',
+        },
+        { status: 400 }
+      );
     }
 
-    if (!/\.(png|jpe?g|webp|gif)$/i.test(imageName)) {
-      return NextResponse.json({ success: false, message: 'Invalid image name' }, { status: 400 });
+    if (!imageUrl.includes('.blob.vercel-storage.com/')) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: 'Invalid image URL',
+        },
+        { status: 400 }
+      );
     }
 
-    const filePath = path.join(uploadDir, imageName);
-    await unlink(filePath);
+    await del(imageUrl);
 
-    const files = await readdir(uploadDir, { withFileTypes: true });
-    const imageNames = files
-      .filter((file) => file.isFile())
-      .map((file) => file.name);
+    const images = await getGalleryImages();
 
-    return NextResponse.json({ success: true, images: getGalleryUrls(imageNames) });
+    return NextResponse.json({
+      success: true,
+      images,
+    });
   } catch (error) {
     console.error('Gallery delete error:', error);
-    return NextResponse.json({ success: false, message: 'Unable to delete image' }, { status: 500 });
+
+    return NextResponse.json(
+      {
+        success: false,
+        message: 'Unable to delete image',
+      },
+      { status: 500 }
+    );
   }
 }
