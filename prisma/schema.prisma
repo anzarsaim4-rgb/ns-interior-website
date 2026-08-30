@@ -1,0 +1,119 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model AdminUser {
+  id           String   @id @default(uuid())
+  username     String   @unique
+  passwordHash String
+  name         String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Lead {
+  id                String      @id @default(uuid())
+  leadCode          String      @unique
+  fullName          String
+  mobileNumber      String
+  whatsappNumber    String?
+  location          String
+  propertyType      String      // Residential, Commercial
+  propertySize      String?     // 1 BHK, 2 BHK, 3 BHK, 4 BHK+, Villa, Office, Shop, Restaurant
+  approxAreaSqFt    Float?
+  requiredServices  String      // JSON array string
+  budgetRange       String?
+  expectedStartDate String?
+  description       String?
+  status            String      @default("NEW") // NEW, CONTACTED, SITE_VISIT, MEASUREMENT, QUOTATION_SENT, NEGOTIATION, WON, LOST, ON_HOLD
+  followUpDate      DateTime?
+  notes             LeadNote[]
+  photos            LeadPhoto[]
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+}
+
+model LeadNote {
+  id        String   @id @default(uuid())
+  leadId    String
+  lead      Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  author    String   @default("Admin")
+  content   String
+  createdAt DateTime @default(now())
+}
+
+model LeadPhoto {
+  id        String   @id @default(uuid())
+  leadId    String
+  lead      Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  fileUrl   String
+  fileSize  Int
+  mimeType  String
+  createdAt DateTime @default(now())
+}
+
+model Project {
+  id             String         @id @default(uuid())
+  slug           String         @unique
+  title          String
+  location       String         // Mumbai, Mumbra, Thane, etc.
+  propertyType   String         // 2 BHK, Corporate Office, etc.
+  projectType    String         // Residential, Commercial, Renovation
+  servicesUsed   String         // JSON array of service names
+  description    String
+  completionDate String?
+  durationWeeks  Int?
+  budgetRange    String?
+  featured       Boolean        @default(false)
+  isPublished    Boolean        @default(true)
+  images         ProjectImage[]
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+}
+
+model ProjectImage {
+  id         String   @id @default(uuid())
+  projectId  String
+  project    Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  imageUrl   String
+  imageType  String   // STANDARD, BEFORE, AFTER
+  caption    String?
+  sortOrder  Int      @default(0)
+}
+
+model Review {
+  id          String   @id @default(uuid())
+  clientName  String
+  location    String
+  rating      Int      @default(5)
+  reviewText  String
+  serviceName String?
+  isVerified  Boolean  @default(true)
+  isPublished Boolean  @default(true)
+  createdAt   DateTime @default(now())
+}
+
+model EstimateConfig {
+  id          String   @id @default(uuid())
+  categoryKey String   @unique // modular_kitchen, false_ceiling, painting, flooring, civil, electrical, plumbing, carpentry, full_interior
+  title       String
+  minRateSqFt Float
+  maxRateSqFt Float
+  unit        String   // sqft, running_ft, lumpsum
+  description String?
+  updatedAt   DateTime @updatedAt
+}
+
+model ServiceArea {
+  id          String   @id @default(uuid())
+  slug        String   @unique
+  name        String   // Mumbai, Mumbra, Thane, Navi Mumbai, etc.
+  district    String   // Mumbai Metropolitan Region
+  isPrimary   Boolean  @default(false)
+  description String?
+}

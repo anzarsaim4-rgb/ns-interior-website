@@ -1,0 +1,31 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-slate-950 text-slate-100 font-sans antialiased selection:bg-amber-500 selection:text-slate-950;
+    overflow-x: hidden;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  img,
+  video,
+  svg {
+    max-width: 100%;
+    display: block;
+  }
+}
+
+.bg-pattern {
+  background-color: #0b0d0f;
+  background-image: radial-gradient(rgba(212, 154, 61, 0.15) 1px, transparent 1px);
+  background-size: 28px 28px;
+}

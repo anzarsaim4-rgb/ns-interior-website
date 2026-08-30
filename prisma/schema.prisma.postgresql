@@ -1,0 +1,122 @@
+// N.S. INTERIOR — Production PostgreSQL Prisma Schema
+// Use this schema when deploying to Vercel with free Supabase / Neon / Railway PostgreSQL instance.
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model AdminUser {
+  id           String   @id @default(uuid())
+  username     String   @unique
+  passwordHash String
+  name         String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Lead {
+  id                String      @id @default(uuid())
+  leadCode          String      @unique
+  fullName          String
+  mobileNumber      String
+  whatsappNumber    String?
+  location          String
+  propertyType      String
+  propertySize      String?
+  approxAreaSqFt    Float?
+  requiredServices  String      // JSON array string
+  budgetRange       String?
+  expectedStartDate String?
+  description       String?
+  status            String      @default("NEW")
+  followUpDate      DateTime?
+  notes             LeadNote[]
+  photos            LeadPhoto[]
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+}
+
+model LeadNote {
+  id        String   @id @default(uuid())
+  leadId    String
+  lead      Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  author    String   @default("Admin")
+  content   String
+  createdAt DateTime @default(now())
+}
+
+model LeadPhoto {
+  id        String   @id @default(uuid())
+  leadId    String
+  lead      Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  fileUrl   String
+  fileSize  Int
+  mimeType  String
+  createdAt DateTime @default(now())
+}
+
+model Project {
+  id             String         @id @default(uuid())
+  slug           String         @unique
+  title          String
+  location       String
+  propertyType   String
+  projectType    String
+  servicesUsed   String
+  description    String
+  completionDate String?
+  durationWeeks  Int?
+  budgetRange    String?
+  featured       Boolean        @default(false)
+  isPublished    Boolean        @default(true)
+  images         ProjectImage[]
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+}
+
+model ProjectImage {
+  id         String   @id @default(uuid())
+  projectId  String
+  project    Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  imageUrl   String
+  imageType  String   // STANDARD, BEFORE, AFTER
+  caption    String?
+  sortOrder  Int      @default(0)
+}
+
+model Review {
+  id          String   @id @default(uuid())
+  clientName  String
+  location    String
+  rating      Int      @default(5)
+  reviewText  String
+  serviceName String?
+  isVerified  Boolean  @default(true)
+  isPublished Boolean  @default(true)
+  createdAt   DateTime @default(now())
+}
+
+model EstimateConfig {
+  id          String   @id @default(uuid())
+  categoryKey String   @unique
+  title       String
+  minRateSqFt Float
+  maxRateSqFt Float
+  unit        String
+  description String?
+  updatedAt   DateTime @updatedAt
+}
+
+model ServiceArea {
+  id          String   @id @default(uuid())
+  slug        String   @unique
+  name        String
+  district    String
+  isPrimary   Boolean  @default(false)
+  description String?
+}
