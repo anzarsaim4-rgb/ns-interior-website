@@ -6,6 +6,8 @@ import Footer from '@/components/Footer';
 import MobileActionFooter from '@/components/MobileActionFooter';
 import { getLocalBusinessSchema } from '@/lib/seo';
 
+const siteUrl = 'https://ns-interior-website.vercel.app';
+
 const inter = Inter({
   subsets: ['latin'],
   variable: '--font-inter',
@@ -24,23 +26,23 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://nsinterior.in'),
+  metadataBase: new URL(siteUrl),
   title: {
-    default: 'N.S. INTERIOR | Interior Execution & Contracting Services Mumbai, Mumbra, Thane',
+    default: 'N.S. INTERIOR | Interior Execution & Contracting in Mumbai, Mumbra & Thane',
     template: '%s | N.S. INTERIOR',
   },
   description:
-    'N.S. INTERIOR provides expert interior execution, modular kitchen, custom carpentry, false ceiling, painting, electrical & plumbing services across Mumbai, Mumbra, and Thane. 7+ years experience.',
+    'N.S. INTERIOR delivers direct interior execution and contracting services for residential and commercial projects in Mumbai, Mumbra and Thane, including modular kitchens, carpentry, false ceilings, painting, and turnkey renovation work.',
   keywords: [
     'N.S. INTERIOR',
-    'interior execution Mumbai',
-    'interior contractor Mumbra',
-    'interior contractor Thane',
-    'modular kitchen execution',
-    'carpenter work Thane',
-    'false ceiling contractor Mumbra',
-    'home renovation Mumbai',
-    'office interior contractor',
+    'Interior Contractor Mumbai',
+    'Interior Contractor Mumbra',
+    'Interior Contractor Thane',
+    'Interior Execution & Contracting Mumbai',
+    'Modular Kitchen Mumbai',
+    'False Ceiling Contractor',
+    'Custom Carpentry Mumbai',
+    'Turnkey Interior Renovation',
   ],
   authors: [{ name: 'N.S. INTERIOR' }],
   creator: 'N.S. INTERIOR',
@@ -51,20 +53,20 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_IN',
-    url: 'https://nsinterior.in',
-    title: 'N.S. INTERIOR — Interior Execution & Contracting Services',
+    url: siteUrl,
+    title: 'N.S. INTERIOR | Interior Execution & Contracting',
     description:
-      '7+ years experience in direct interior execution across Mumbai, Mumbra & Thane. Modular kitchen, carpentry, false ceiling, painting & full home renovation.',
+      'Interior execution and contracting services in Mumbai, Mumbra and Thane for residential and commercial projects, modular kitchens, custom carpentry, false ceilings and renovation work.',
     siteName: 'N.S. INTERIOR',
   },
   twitter: {
     card: 'summary_large_image',
     title: 'N.S. INTERIOR',
     description:
-      'Interior design execution and contracting services in Mumbai, Mumbra & Thane.',
+      'Interior execution and contracting services in Mumbai, Mumbra and Thane.',
   },
   alternates: {
-    canonical: 'https://nsinterior.in',
+    canonical: siteUrl,
   },
 };
 

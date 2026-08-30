@@ -1,42 +1,28 @@
 import { MetadataRoute } from 'next';
-import { ALL_SERVICES, BUSINESS_INFO } from '@/lib/constants';
+
+const siteUrl = 'https://ns-interior-website.vercel.app';
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://nsinterior.in';
-
-  const staticPages = [
+  const routes = [
     '',
     '/about',
     '/services',
     '/portfolio',
+    '/gallery',
     '/before-and-after',
     '/service-areas',
     '/estimate-calculator',
-    '/enquiry',
     '/contact',
+    '/enquiry',
     '/privacy-policy',
     '/terms-and-conditions',
     '/reviews',
-  ].map((route) => ({
-    url: `${baseUrl}${route}`,
+  ];
+
+  return routes.map((route) => ({
+    url: `${siteUrl}${route}`,
     lastModified: new Date(),
-    changeFrequency: 'weekly' as const,
+    changeFrequency: route === '' ? 'weekly' : 'monthly',
     priority: route === '' ? 1.0 : 0.8,
   }));
-
-  const servicePages = ALL_SERVICES.map((srv) => ({
-    url: `${baseUrl}/services/${srv.slug}`,
-    lastModified: new Date(),
-    changeFrequency: 'monthly' as const,
-    priority: 0.9,
-  }));
-
-  const locationPages = BUSINESS_INFO.primaryLocations.map((loc) => ({
-    url: `${baseUrl}/service-areas/${loc.toLowerCase()}`,
-    lastModified: new Date(),
-    changeFrequency: 'monthly' as const,
-    priority: 0.85,
-  }));
-
-  return [...staticPages, ...servicePages, ...locationPages];
 }
