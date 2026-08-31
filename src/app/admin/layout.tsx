@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { LayoutDashboard, Users, LogOut, Shield, ChevronRight } from 'lucide-react';
+import { LayoutDashboard, Users, Images, LogOut, Shield, ChevronRight } from 'lucide-react';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const [authenticated, setAuthenticated] = useState<boolean | null>(null);
@@ -95,6 +95,21 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <div className="flex items-center gap-2.5">
               <Users className="w-4 h-4" />
               <span>Leads Management</span>
+            </div>
+            <ChevronRight className="w-3.5 h-3.5 opacity-50" />
+          </Link>
+
+          <Link
+            href="/admin/gallery"
+            className={`flex items-center justify-between px-3 py-2.5 rounded-xl transition-colors ${
+              pathname.startsWith('/admin/gallery')
+                ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+                : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+            }`}
+          >
+            <div className="flex items-center gap-2.5">
+              <Images className="w-4 h-4" />
+              <span>Gallery Management</span>
             </div>
             <ChevronRight className="w-3.5 h-3.5 opacity-50" />
           </Link>
