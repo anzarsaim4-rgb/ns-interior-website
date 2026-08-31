@@ -1,3 +1,4 @@
+require('dotenv').config();
 const { PrismaClient } = require('@prisma/client');
 const bcrypt = require('bcryptjs');
 
@@ -7,20 +8,44 @@ async function main() {
   console.log('Seeding N.S. INTERIOR database...');
 
   // 1. Seed Default Admin User
+  const adminUsername = process.env.ADMIN_USERNAME;
+  const adminPassword = process.env.ADMIN_PASSWORD;
+
+  if (!adminUsername || !adminPassword) {
+    throw new Error(
+      'ADMIN_USERNAME and ADMIN_PASSWORD must be set in .env'
+    );
+  }
+
+  const passwordHash = await bcrypt.hash(adminPassword, 12);
+
   const existingAdmin = await prisma.adminUser.findUnique({
-    where: { username: 'admin' },
+    where: {
+      username: adminUsername,
+    },
   });
 
   if (!existingAdmin) {
-    const passwordHash = await bcrypt.hash('admin@ns2026', 10);
     await prisma.adminUser.create({
       data: {
-        username: 'admin',
+        username: adminUsername,
         passwordHash,
         name: 'Naushad (Contractor)',
       },
     });
-    console.log('Created default admin user: admin / admin@ns2026');
+
+    console.log('Admin user created successfully.');
+  } else {
+    await prisma.adminUser.update({
+      where: {
+        username: adminUsername,
+      },
+      data: {
+        passwordHash,
+      },
+    });
+
+    console.log('Admin password hash updated successfully.');
   }
 
   // 2. Seed Default Estimate Config Rates

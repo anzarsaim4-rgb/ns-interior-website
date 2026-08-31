@@ -1,9 +1,12 @@
 import { del, list, put } from '@vercel/blob';
 import { NextResponse } from 'next/server';
+import { verifyAdminSession } from '@/lib/auth';
 
 const GALLERY_PREFIX = 'gallery/';
 
-function getGalleryUrls(blobs: Array<{ url: string; pathname: string }>) {
+function getGalleryUrls(
+  blobs: Array<{ url: string; pathname: string }>
+) {
   return blobs
     .filter((blob) => /\.(png|jpe?g|webp|gif)$/i.test(blob.pathname))
     .sort((a, b) => b.pathname.localeCompare(a.pathname))
@@ -19,6 +22,10 @@ async function getGalleryImages() {
   return getGalleryUrls(result.blobs);
 }
 
+/**
+ * Public:
+ * Anyone can view gallery images.
+ */
 export async function GET() {
   try {
     const images = await getGalleryImages();
@@ -41,8 +48,24 @@ export async function GET() {
   }
 }
 
+/**
+ * Admin only:
+ * Upload gallery images.
+ */
 export async function POST(request: Request) {
   try {
+    const admin = await verifyAdminSession();
+
+    if (!admin) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: 'Unauthorized. Admin login required.',
+        },
+        { status: 401 }
+      );
+    }
+
     const formData = await request.formData();
     const files = formData.getAll('images');
 
@@ -59,24 +82,16 @@ export async function POST(request: Request) {
     const uploadedUrls: string[] = [];
 
     for (const item of files) {
-      if (!(item instanceof File)) {
-        continue;
-      }
+      if (!(item instanceof File)) continue;
+      if (item.size === 0) continue;
+      if (!item.type.startsWith('image/')) continue;
 
-      if (item.size === 0) {
-        continue;
-      }
+      const originalName =
+        item.name || `gallery-${Date.now()}.jpg`;
 
-      if (!item.type.startsWith('image/')) {
-        continue;
-      }
-
-      const originalName = item.name || `gallery-${Date.now()}.jpg`;
-
-      const extension =
-        originalName.includes('.')
-          ? `.${originalName.split('.').pop()}`
-          : '.jpg';
+      const extension = originalName.includes('.')
+        ? `.${originalName.split('.').pop()}`
+        : '.jpg';
 
       const safeBaseName = originalName
         .replace(/\.[^/.]+$/, '')
@@ -85,9 +100,12 @@ export async function POST(request: Request) {
         .replace(/^-|-$/g, '')
         .slice(0, 80);
 
-      const pathname = `${GALLERY_PREFIX}${safeBaseName || 'project'}-${Date.now()}-${Math.random()
-        .toString(36)
-        .slice(2, 8)}${extension}`;
+      const pathname =
+        `${GALLERY_PREFIX}` +
+        `${safeBaseName || 'project'}-` +
+        `${Date.now()}-` +
+        `${Math.random().toString(36).slice(2, 8)}` +
+        `${extension}`;
 
       const blob = await put(pathname, item, {
         access: 'public',
@@ -128,8 +146,24 @@ export async function POST(request: Request) {
   }
 }
 
+/**
+ * Admin only:
+ * Delete gallery image.
+ */
 export async function DELETE(request: Request) {
   try {
+    const admin = await verifyAdminSession();
+
+    if (!admin) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: 'Unauthorized. Admin login required.',
+        },
+        { status: 401 }
+      );
+    }
+
     const { searchParams } = new URL(request.url);
     const imageUrl = searchParams.get('url');
 
@@ -143,17 +177,31 @@ export async function DELETE(request: Request) {
       );
     }
 
-    if (!imageUrl.includes('.blob.vercel-storage.com/')) {
+    /*
+     * Security:
+     * Only allow deletion of an image that actually exists
+     * inside our gallery/ Blob prefix.
+     */
+    const result = await list({
+      prefix: GALLERY_PREFIX,
+      limit: 1000,
+    });
+
+    const galleryBlob = result.blobs.find(
+      (blob) => blob.url === imageUrl
+    );
+
+    if (!galleryBlob) {
       return NextResponse.json(
         {
           success: false,
-          message: 'Invalid image URL',
+          message: 'Image not found in gallery',
         },
-        { status: 400 }
+        { status: 404 }
       );
     }
 
-    await del(imageUrl);
+    await del(galleryBlob.url);
 
     const images = await getGalleryImages();
 

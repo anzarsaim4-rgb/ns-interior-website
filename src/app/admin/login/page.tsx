@@ -99,12 +99,6 @@ export default function AdminLoginPage() {
             {loading ? 'Authenticating...' : 'Sign In to Portal →'}
           </button>
         </form>
-
-        <div className="text-center pt-2 border-t border-slate-800">
-          <p className="text-[11px] text-slate-500">
-            Default dev login: <code className="text-amber-400 font-mono">admin</code> / <code className="text-amber-400 font-mono">admin@ns2026</code>
-          </p>
-        </div>
       </div>
     </div>
   );
