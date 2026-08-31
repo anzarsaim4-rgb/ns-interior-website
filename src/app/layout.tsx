@@ -1,9 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { Inter, Outfit } from 'next/font/google';
 import './globals.css';
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
-import MobileActionFooter from '@/components/MobileActionFooter';
+import SiteShell from '@/components/SiteShell';
 import { getLocalBusinessSchema } from '@/lib/seo';
 
 const siteUrl = 'https://ns-interior-website.vercel.app';
@@ -86,14 +84,7 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-screen bg-slate-950 text-slate-100 font-sans">
-        <div className="min-h-screen lg:flex lg:items-stretch">
-          <div className="lg:w-[280px] lg:flex-shrink-0">
-            <Header />
-          </div>
-          <main className="flex-1 min-w-0">{children}</main>
-        </div>
-        <Footer />
-        <MobileActionFooter />
+        <SiteShell>{children}</SiteShell>
       </body>
     </html>
   );
