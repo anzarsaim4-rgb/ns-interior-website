@@ -36,3 +36,5 @@ prisma/*.db-journal
 .vercel
 
 tsconfig.tsbuildinfo
+
+.env*

@@ -4,6 +4,10 @@ import { verifyAdminSession } from '@/lib/auth';
 
 const GALLERY_PREFIX = 'gallery/';
 
+function getBlobToken() {
+  return process.env.BLOB_READ_WRITE_TOKEN;
+}
+
 function getGalleryUrls(
   blobs: Array<{ url: string; pathname: string }>
 ) {
@@ -14,9 +18,11 @@ function getGalleryUrls(
 }
 
 async function getGalleryImages() {
+  const token = getBlobToken();
   const result = await list({
     prefix: GALLERY_PREFIX,
     limit: 1000,
+    token: token,
   });
 
   return getGalleryUrls(result.blobs);
@@ -29,7 +35,7 @@ async function getGalleryImages() {
 export async function GET() {
   try {
     const images = await getGalleryImages();
-    const admin = await verifyAdminSession();
+    const admin = await verifyAdminSession().catch(() => null);
 
     return NextResponse.json({
       success: true,
@@ -82,6 +88,7 @@ export async function POST(request: Request) {
     }
 
     const uploadedUrls: string[] = [];
+    const token = getBlobToken();
 
     for (const item of files) {
       if (!(item instanceof File)) continue;
@@ -114,6 +121,7 @@ export async function POST(request: Request) {
         addRandomSuffix: false,
         contentType: item.type,
         cacheControlMaxAge: 31536000,
+        token: token,
       });
 
       uploadedUrls.push(blob.url);
@@ -184,9 +192,11 @@ export async function DELETE(request: Request) {
      * Only allow deletion of an image that actually exists
      * inside our gallery/ Blob prefix.
      */
+    const token = getBlobToken();
     const result = await list({
       prefix: GALLERY_PREFIX,
       limit: 1000,
+      token: token,
     });
 
     const galleryBlob = result.blobs.find(
@@ -203,7 +213,9 @@ export async function DELETE(request: Request) {
       );
     }
 
-    await del(galleryBlob.url);
+    await del(galleryBlob.url, {
+      token: token,
+    });
 
     const images = await getGalleryImages();
 
