@@ -26,23 +26,19 @@ export default function Header() {
 
       <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-5 lg:h-full">
         <div className="flex items-center justify-between h-16 sm:h-20 lg:h-full lg:flex-col lg:items-stretch lg:justify-start lg:pt-4 lg:pb-6 lg:gap-5">
-          <div className="lg:w-full">
-            <Link href="/" className="flex items-center gap-3 group shrink-0 lg:mb-5 lg:px-3">
-             <img
-              src="/logo.png"
-              alt="N.S. INTERIOR"
-              className="w-12 h-12 sm:w-14 sm:h-14 object-contain group-hover:scale-105 transition-transform"
-/>
-              <div>
-                <div className="font-bold text-lg sm:text-xl tracking-wide text-white flex items-center gap-2">
-                  N.S. INTERIOR
-                </div>
-                <div className="text-[10px] sm:text-xs text-amber-400 font-medium tracking-wider uppercase">
-                  Execution & Contracting
-                </div>
-              </div>
-            </Link>
-          </div>
+        <div className="lg:w-full">
+      <Link
+        href="/"
+        className="flex items-center justify-center lg:justify-start group shrink-0 lg:mb-5 lg:px-3"
+        aria-label="N.S. INTERIOR Home"
+      >
+        <img
+          src="/32e32672-bcdb-4515-b3e2-a0eb7106e693.png"
+          alt="N.S. INTERIOR"
+          className="h-16 sm:h-20 lg:h-24 w-auto max-w-full object-contain object-left transition-transform duration-300 group-hover:scale-[1.02]"
+        />
+      </Link>
+    </div>
 
           <div className="hidden lg:flex lg:flex-col lg:w-full lg:flex-1 lg:items-stretch lg:px-3">
             <nav className="space-y-2 text-sm font-medium">
