@@ -28,9 +28,11 @@ export default function Header() {
         <div className="flex items-center justify-between h-16 sm:h-20 lg:h-full lg:flex-col lg:items-stretch lg:justify-start lg:pt-4 lg:pb-6 lg:gap-5">
           <div className="lg:w-full">
             <Link href="/" className="flex items-center gap-3 group shrink-0 lg:mb-5 lg:px-3">
-              <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-lg bg-gradient-to-br from-amber-500 to-amber-700 flex items-center justify-center font-black text-slate-950 text-xl tracking-tighter shadow-md group-hover:scale-105 transition-transform">
-                NS
-              </div>
+             <img
+              src="/logo.png"
+              alt="N.S. INTERIOR"
+              className="w-12 h-12 sm:w-14 sm:h-14 object-contain group-hover:scale-105 transition-transform"
+/>
               <div>
                 <div className="font-bold text-lg sm:text-xl tracking-wide text-white flex items-center gap-2">
                   N.S. INTERIOR
