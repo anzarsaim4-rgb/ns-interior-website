@@ -29,10 +29,12 @@ async function getGalleryImages() {
 export async function GET() {
   try {
     const images = await getGalleryImages();
+    const admin = await verifyAdminSession();
 
     return NextResponse.json({
       success: true,
       images,
+      isAdmin: !!admin,
     });
   } catch (error) {
     console.error('Gallery fetch error:', error);
