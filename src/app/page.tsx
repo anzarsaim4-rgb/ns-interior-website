@@ -28,7 +28,6 @@ import EstimateCalculator from '@/components/EstimateCalculator';
 import ReviewsSection from '@/components/ReviewsSection';
 import MobileStickyBar from '@/components/MobileStickyBar';
 
-// High-end Architectural & Interior Execution Wallpaper Slides
 const heroInteriorSlides = [
   'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=2000&q=85',
   'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=2000&q=85',
@@ -51,10 +50,10 @@ export default function HomePage() {
   return (
     <div className="relative min-h-screen w-full bg-slate-950 text-slate-100 overflow-x-hidden pb-20 sm:pb-0">
       
-      {/* 1. HERO SECTION WITH LUXURY RESTRICTED SLIDESHOW */}
+      {/* 1. HERO SECTION */}
       <section className="relative min-h-[80vh] sm:min-h-[85vh] lg:min-h-[90vh] flex items-center border-b border-slate-800/80 overflow-hidden py-10 sm:py-20">
         
-        {/* Background Ken-Burns Slideshow - Strictly Contained within Hero */}
+        {/* Background Slideshow */}
         <div className="absolute inset-0 w-full h-full pointer-events-none overflow-hidden">
           {heroInteriorSlides.map((image, index) => {
             const isActive = index === activeSlide;
@@ -63,9 +62,7 @@ export default function HomePage() {
               <div
                 key={`${image}-${index}`}
                 className={`absolute inset-0 w-full h-full transition-all duration-[2000ms] ease-out ${
-                  isActive
-                    ? 'opacity-100 scale-105'
-                    : 'opacity-0 scale-100'
+                  isActive ? 'opacity-100 scale-105' : 'opacity-0 scale-100'
                 }`}
                 style={{
                   backgroundImage: `url('${image}')`,
@@ -77,7 +74,6 @@ export default function HomePage() {
             );
           })}
 
-          {/* Premium Multi-layer Vignette Gradients for Crystal Clear Legibility */}
           <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/85 to-slate-950/40" />
           <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-slate-950/70" />
         </div>
@@ -198,11 +194,11 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 2. BODY CONTENT SECTIONS (CLEAN LUXURY DARK THEME) */}
-      <div className="relative z-10 space-y-14 sm:space-y-28 py-10 sm:py-16">
+      {/* 2. BODY CONTENT */}
+      <div className="relative z-10 space-y-16 sm:space-y-28 py-12 sm:py-16">
         
-        {/* BUSINESS STRENGTHS (Mobile Horizontal Swipe + Desktop Grid) */}
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+        {/* BUSINESS STRENGTHS SECTION (Direct Grid Layout - 100% Width) */}
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
           <div className="text-center max-w-3xl mx-auto space-y-2 sm:space-y-3">
             <h2 className="text-2xl sm:text-4xl font-extrabold text-white">
               Why Home & Business Owners Choose <span className="text-amber-400">N.S. INTERIOR</span>
@@ -212,11 +208,11 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div className="flex md:grid md:grid-cols-3 gap-4 sm:gap-6 overflow-x-auto md:overflow-visible pb-3 md:pb-0 snap-x snap-mandatory">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
             {BUSINESS_INFO.strengths.map((strength, index) => (
               <div
                 key={index}
-                className="min-w-[260px] md:min-w-0 flex-shrink-0 md:flex-shrink snap-center border border-slate-850 bg-slate-900/70 hover:border-amber-500/40 p-5 sm:p-6 rounded-2xl transition-all space-y-3 group shadow-lg"
+                className="w-full border border-slate-850 bg-slate-900/70 hover:border-amber-500/40 p-5 sm:p-6 rounded-2xl transition-all space-y-3 group shadow-lg"
               >
                 <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center font-bold text-xs sm:text-sm group-hover:scale-110 transition-transform">
                   0{index + 1}
@@ -231,7 +227,7 @@ export default function HomePage() {
         </section>
 
         {/* ALL 21 SERVICES SHOWCASE */}
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2 sm:gap-4">
             <div>
               <span className="text-amber-400 text-[10px] sm:text-xs font-extrabold uppercase tracking-wider block mb-1">
@@ -250,30 +246,30 @@ export default function HomePage() {
             </Link>
           </div>
 
-          <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {ALL_SERVICES.slice(0, 9).map((service) => (
               <Link
                 key={service.slug}
                 href={`/services/${service.slug}`}
-                className="border border-slate-850 bg-slate-900/70 hover:border-amber-500/50 p-3.5 sm:p-6 rounded-2xl transition-all space-y-2 sm:space-y-3 group block shadow-lg"
+                className="border border-slate-850 bg-slate-900/70 hover:border-amber-500/50 p-4 sm:p-6 rounded-2xl transition-all space-y-3 group block shadow-lg"
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider bg-slate-950 text-amber-300 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded border border-slate-800">
+                  <span className="text-[10px] font-bold uppercase tracking-wider bg-slate-950 text-amber-300 px-2.5 py-1 rounded border border-slate-800">
                     {service.category}
                   </span>
-                  <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-500 group-hover:text-amber-400 group-hover:translate-x-1 transition-all hidden sm:block" />
+                  <ArrowRight className="w-4 h-4 text-slate-500 group-hover:text-amber-400 group-hover:translate-x-1 transition-all" />
                 </div>
-                <h3 className="text-xs sm:text-lg font-bold text-white group-hover:text-amber-400 transition-colors leading-snug">
+                <h3 className="text-base sm:text-lg font-bold text-white group-hover:text-amber-400 transition-colors">
                   {service.name}
                 </h3>
-                <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed hidden sm:block">
+                <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed">
                   {service.shortDesc}
                 </p>
-                <div className="pt-1 sm:pt-2 flex flex-wrap gap-1">
+                <div className="pt-2 flex flex-wrap gap-1">
                   {service.highlights.slice(0, 2).map((h, i) => (
                     <span
                       key={i}
-                      className="text-[9px] sm:text-[10px] bg-slate-950 text-slate-300 px-1.5 sm:px-2 py-0.5 rounded border border-slate-850"
+                      className="text-[10px] bg-slate-950 text-slate-300 px-2 py-0.5 rounded border border-slate-850"
                     >
                       ✓ {h}
                     </span>
@@ -371,7 +367,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* VERIFIED CUSTOMER REVIEWS / TESTIMONIALS */}
+        {/* VERIFIED CUSTOMER REVIEWS */}
         <ReviewsSection />
 
         {/* LEAD CAPTURE FORM SECTION */}

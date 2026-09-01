@@ -68,8 +68,8 @@ const REVIEWS_DATA: Review[] = [
 
 export default function ReviewsSection() {
   return (
-    <section className="py-10 sm:py-20 border-t border-slate-800 bg-slate-950/60">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 sm:space-y-10">
+    <section className="py-12 sm:py-20 border-t border-slate-800 bg-slate-950/60">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 sm:space-y-10">
         
         {/* Header Title */}
         <div className="text-center max-w-3xl mx-auto space-y-2.5">
@@ -85,12 +85,12 @@ export default function ReviewsSection() {
           </p>
         </div>
 
-        {/* Reviews Cards: Mobile Horizontal Swipe Carousel + Desktop Grid */}
-        <div className="flex md:grid md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 overflow-x-auto md:overflow-visible pb-4 md:pb-0 snap-x snap-mandatory">
+        {/* Direct Grid Layout (Mobile Full Width Stacked + Desktop 3 Columns) */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {REVIEWS_DATA.map((review) => (
             <div
               key={review.id}
-              className="min-w-[285px] sm:min-w-[320px] md:min-w-0 flex-shrink-0 md:flex-shrink snap-center bg-slate-900/80 border border-slate-800 hover:border-amber-500/40 rounded-2xl p-5 sm:p-6 flex flex-col justify-between space-y-4 sm:space-y-5 transition duration-300 hover:-translate-y-1 shadow-xl relative"
+              className="w-full bg-slate-900/80 border border-slate-800 hover:border-amber-500/40 rounded-2xl p-5 sm:p-6 flex flex-col justify-between space-y-4 sm:space-y-5 transition duration-300 hover:-translate-y-1 shadow-xl relative"
             >
               <Quote className="absolute top-5 right-5 w-7 h-7 sm:w-8 sm:h-8 text-slate-800/80 pointer-events-none" />
 
@@ -109,13 +109,13 @@ export default function ReviewsSection() {
               </div>
 
               {/* Client Info & Tag */}
-              <div className="pt-3 sm:pt-4 border-t border-slate-800/80 space-y-1.5">
+              <div className="pt-3 sm:pt-4 border-t border-slate-800/80 space-y-2">
                 <div className="flex items-center justify-between">
-                  <h4 className="text-xs font-bold text-white">{review.name}</h4>
+                  <h4 className="text-xs sm:text-sm font-bold text-white">{review.name}</h4>
                   <span className="text-[10px] text-slate-500 font-mono">{review.date}</span>
                 </div>
 
-                <div className="flex items-center justify-between text-[11px]">
+                <div className="flex flex-wrap items-center justify-between gap-2 text-[11px]">
                   <span className="text-amber-400/90 font-medium flex items-center gap-1">
                     <MapPin className="w-3 h-3" />
                     {review.location}
