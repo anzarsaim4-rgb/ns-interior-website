@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Search, Filter, Phone, MessageCircle, MapPin, CheckCircle2, ArrowRight, Loader2 } from 'lucide-react';
+import { Search, Filter, Phone, MessageCircle, MapPin, CheckCircle2, ArrowRight, Loader2, Sparkles } from 'lucide-react';
 
 const STATUS_LIST = [
   'ALL',
@@ -36,59 +36,65 @@ export default function AdminLeadsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [updatingId, setUpdatingId] = useState<string | null>(null);
 
-  useEffect(() => {
+  const fetchLeads = () => {
+    setLoading(true);
     fetch('/api/leads')
       .then((res) => res.json())
       .then((data) => {
         if (data.leads) setLeads(data.leads);
       })
+      .catch((err) => console.error('Failed to fetch leads', err))
       .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    fetchLeads();
   }, []);
 
-  // Update Status Inline via API
+  // Update Status Inline via API + Optimistic UI Instant Update
   const handleStatusChange = async (leadId: string, newStatus: string) => {
+    // 1. Instant UI update so user sees immediate feedback
+    setLeads((prev) =>
+      prev.map((l) => (l.id === leadId ? { ...l, status: newStatus } : l))
+    );
+    setUpdatingId(leadId);
+
     try {
-      setUpdatingId(leadId);
       const res = await fetch(`/api/leads/${leadId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus }),
       });
 
-      const data = await res.json();
-      if (res.ok && data.success !== false) {
-        setLeads((prev) =>
-          prev.map((l) => (l.id === leadId ? { ...l, status: newStatus } : l))
-        );
-      } else {
-        // Fallback for PUT if PATCH isn't configured
-        const putRes = await fetch(`/api/leads/${leadId}`, {
+      if (!res.ok) {
+        // Fallback for PUT if PATCH endpoint not configured
+        await fetch(`/api/leads/${leadId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ status: newStatus }),
         });
-        if (putRes.ok) {
-          setLeads((prev) =>
-            prev.map((l) => (l.id === leadId ? { ...l, status: newStatus } : l))
-          );
-        }
       }
     } catch (err) {
-      console.error('Failed to update lead status', err);
+      console.error('Failed to save lead status to database', err);
     } finally {
       setUpdatingId(null);
     }
   };
 
+  // Filter Logic: Filter by exact status tab & search query
   const filteredLeads = leads.filter((lead) => {
-    const matchesStatus = statusFilter === 'ALL' || lead.status === statusFilter;
-    const q = searchQuery.toLowerCase();
+    const matchesStatus =
+      statusFilter === 'ALL' ||
+      (lead.status && lead.status.trim().toUpperCase() === statusFilter.trim().toUpperCase());
+
+    const q = searchQuery.toLowerCase().trim();
     const matchesSearch =
-      !searchQuery ||
+      !q ||
       lead.leadCode?.toLowerCase().includes(q) ||
       lead.fullName?.toLowerCase().includes(q) ||
       lead.mobileNumber?.toLowerCase().includes(q) ||
       lead.location?.toLowerCase().includes(q);
+
     return matchesStatus && matchesSearch;
   });
 
@@ -103,95 +109,116 @@ export default function AdminLeadsPage() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'WON':
-        return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30';
+        return 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40';
       case 'LOST':
-        return 'bg-rose-500/10 text-rose-400 border-rose-500/30';
+        return 'bg-rose-500/20 text-rose-300 border-rose-500/40';
       case 'SITE_VISIT':
       case 'MEASUREMENT':
-        return 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30';
+        return 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40';
       case 'QUOTATION_SENT':
-        return 'bg-purple-500/10 text-purple-400 border-purple-500/30';
+        return 'bg-purple-500/20 text-purple-300 border-purple-500/40';
       default:
-        return 'bg-amber-500/10 text-amber-400 border-amber-500/20';
+        return 'bg-amber-500/20 text-amber-300 border-amber-500/30';
     }
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-12">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-white">
+          <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight drop-shadow-md">
             Customer Lead Management
           </h1>
-          <p className="text-xs text-slate-400 mt-1">
-            Track customer inquiries, trigger direct WhatsApp follow-ups, and manage site visits.
+          <p className="text-xs text-slate-200 mt-1">
+            Track inquiries, update pipeline status in real-time, and trigger direct WhatsApp/Call follow-ups.
           </p>
+        </div>
+        <div className="text-xs font-mono text-amber-300 bg-slate-950/60 px-3 py-1.5 rounded-xl border border-white/10 backdrop-blur-md self-start sm:self-auto">
+          Showing: <span className="font-bold text-white">{filteredLeads.length}</span> of {leads.length} leads
         </div>
       </div>
 
-      {/* Filters & Search */}
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
-        {/* Search */}
-        <div className="md:col-span-6 relative">
+      {/* Filters & Search Bar */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center">
+        {/* Search Input */}
+        <div className="lg:col-span-4 relative">
           <input
             type="text"
             placeholder="Search by Lead ID, name, mobile, location..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-slate-900 border border-slate-800 rounded-xl pl-9 pr-3 py-2.5 text-xs text-white focus:outline-none focus:border-amber-500"
+            className="w-full bg-slate-950/60 border border-white/15 rounded-xl pl-9 pr-3 py-2.5 text-xs text-white placeholder:text-slate-400 focus:outline-none focus:border-amber-400 backdrop-blur-md"
           />
-          <Search className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
+          <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
         </div>
 
-        {/* Status Filter */}
-        <div className="md:col-span-6 flex items-center gap-2 overflow-x-auto pb-1">
-          <Filter className="w-4 h-4 text-slate-400 flex-shrink-0" />
+        {/* Status Filter Tabs */}
+        <div className="lg:col-span-8 flex items-center gap-2 overflow-x-auto pb-1">
+          <Filter className="w-4 h-4 text-amber-400 flex-shrink-0" />
           <div className="flex gap-1.5">
-            {STATUS_LIST.map((st) => (
-              <button
-                type="button"
-                key={st}
-                onClick={() => setStatusFilter(st)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-colors ${
-                  statusFilter === st
-                    ? 'bg-amber-500 text-slate-950'
-                    : 'bg-slate-900 text-slate-300 border border-slate-800 hover:border-slate-700'
-                }`}
-              >
-                {st}
-              </button>
-            ))}
+            {STATUS_LIST.map((st) => {
+              const count = st === 'ALL' ? leads.length : leads.filter((l) => l.status === st).length;
+              const isActive = statusFilter === st;
+
+              return (
+                <button
+                  type="button"
+                  key={st}
+                  onClick={() => setStatusFilter(st)}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 shadow-md ${
+                    isActive
+                      ? 'bg-amber-500 text-slate-950 shadow-amber-500/20'
+                      : 'bg-slate-950/60 text-slate-300 border border-white/10 hover:border-white/20 hover:text-white backdrop-blur-md'
+                  }`}
+                >
+                  <span>{st}</span>
+                  <span
+                    className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${
+                      isActive ? 'bg-slate-950 text-amber-300' : 'bg-slate-800 text-slate-400'
+                    }`}
+                  >
+                    {count}
+                  </span>
+                </button>
+              );
+            })}
           </div>
         </div>
       </div>
 
-      {/* Leads Table */}
-      <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl">
+      {/* Leads Glassmorphic Table */}
+      <div className="bg-slate-950/45 border border-white/15 rounded-3xl p-6 shadow-2xl backdrop-blur-xl">
         {loading ? (
-          <div className="py-8 text-center text-xs text-slate-400">Loading leads data...</div>
+          <div className="py-12 text-center text-xs text-amber-300 font-mono flex items-center justify-center gap-2">
+            <Loader2 className="w-4 h-4 animate-spin" />
+            <span>Loading leads data...</span>
+          </div>
         ) : filteredLeads.length === 0 ? (
-          <div className="py-12 text-center text-xs text-slate-400">
-            No leads match the selected filter query.
+          <div className="py-14 text-center space-y-2">
+            <p className="text-slate-200 text-sm font-bold">No leads found under "{statusFilter}" status.</p>
+            <p className="text-slate-400 text-xs">
+              Change the filter tab above or search for another customer query.
+            </p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-slate-950 text-slate-400 uppercase text-[10px] font-bold">
+              <thead className="bg-slate-950/70 text-slate-300 uppercase text-[10px] font-bold">
                 <tr>
                   <th className="p-3">Ref ID</th>
                   <th className="p-3">Client</th>
                   <th className="p-3">Location</th>
                   <th className="p-3">Property</th>
                   <th className="p-3">Quick Connect</th>
-                  <th className="p-3">Status</th>
+                  <th className="p-3">Pipeline Status</th>
                   <th className="p-3">Photos</th>
                   <th className="p-3 text-right">Action</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800 text-slate-300">
+              <tbody className="divide-y divide-white/10 text-slate-200">
                 {filteredLeads.map((lead) => (
-                  <tr key={lead.id} className="hover:bg-slate-800/50 transition-colors">
+                  <tr key={lead.id} className="hover:bg-white/5 transition-colors">
                     <td className="p-3 font-mono font-bold text-amber-400">{lead.leadCode}</td>
                     <td className="p-3">
                       <div className="font-semibold text-white">{lead.fullName}</div>
@@ -199,7 +226,7 @@ export default function AdminLeadsPage() {
                     </td>
                     <td className="p-3">{lead.location}</td>
                     <td className="p-3">{lead.propertySize || lead.propertyType || 'N/A'}</td>
-                    
+
                     {/* Quick Follow-up Buttons */}
                     <td className="p-3">
                       <div className="flex items-center gap-2">
@@ -208,7 +235,7 @@ export default function AdminLeadsPage() {
                           target="_blank"
                           rel="noopener noreferrer"
                           title="Open WhatsApp Chat"
-                          className="flex items-center gap-1 bg-emerald-950/60 hover:bg-emerald-900 text-emerald-400 border border-emerald-500/30 px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-colors"
+                          className="flex items-center gap-1 bg-emerald-950/60 hover:bg-emerald-900 text-emerald-300 border border-emerald-500/30 px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-colors shadow-sm"
                         >
                           <MessageCircle className="w-3.5 h-3.5" />
                           <span>WhatsApp</span>
@@ -216,7 +243,7 @@ export default function AdminLeadsPage() {
                         <a
                           href={`tel:${lead.mobileNumber}`}
                           title="Direct Call"
-                          className="bg-slate-800 hover:bg-slate-700 text-slate-300 p-1.5 rounded-lg border border-slate-700 transition-colors"
+                          className="bg-slate-900/80 hover:bg-slate-800 text-slate-300 p-1.5 rounded-lg border border-white/10 transition-colors"
                         >
                           <Phone className="w-3.5 h-3.5 text-amber-400" />
                         </a>
@@ -230,9 +257,9 @@ export default function AdminLeadsPage() {
                           value={lead.status}
                           disabled={updatingId === lead.id}
                           onChange={(e) => handleStatusChange(lead.id, e.target.value)}
-                          className={`cursor-pointer rounded-lg border px-2 py-1 text-[10px] font-bold focus:outline-none focus:ring-1 focus:ring-amber-500 transition-all ${getStatusBadge(
+                          className={`cursor-pointer rounded-lg border px-2.5 py-1 text-[10px] font-bold focus:outline-none focus:ring-1 focus:ring-amber-400 transition-all ${getStatusBadge(
                             lead.status
-                          )} bg-slate-950`}
+                          )} bg-slate-950/90 shadow-sm`}
                         >
                           {EDITABLE_STATUSES.map((st) => (
                             <option key={st} value={st} className="bg-slate-900 text-slate-200">
@@ -256,7 +283,7 @@ export default function AdminLeadsPage() {
                     <td className="p-3 text-right">
                       <Link
                         href={`/admin/leads/${lead.id}`}
-                        className="bg-slate-800 hover:bg-amber-500 hover:text-slate-950 text-slate-200 font-bold px-3 py-1.5 rounded-lg text-xs transition-colors inline-flex items-center gap-1"
+                        className="bg-slate-900/80 hover:bg-amber-500 hover:text-slate-950 text-slate-200 font-bold px-3 py-1.5 rounded-lg text-xs transition-colors inline-flex items-center gap-1 border border-white/10 shadow-sm"
                       >
                         <span>Dossier</span>
                         <ArrowRight className="w-3 h-3" />
