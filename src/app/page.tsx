@@ -50,7 +50,7 @@ export default function HomePage() {
   return (
     <div className="relative min-h-screen w-full bg-slate-950 text-slate-100 overflow-x-hidden pb-20 sm:pb-0">
       
-      {/* 1. HERO SECTION */}
+      {/* 1. HERO SECTION WITH CLEAR & VIBRANT BACKGROUND WALLPAPER */}
       <section className="relative min-h-[80vh] sm:min-h-[85vh] lg:min-h-[90vh] flex items-center border-b border-slate-800/80 overflow-hidden py-10 sm:py-20">
         
         {/* Background Slideshow */}
@@ -74,8 +74,10 @@ export default function HomePage() {
             );
           })}
 
-          <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/85 to-slate-950/40" />
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-slate-950/70" />
+          {/* Soft & Lightened Overlays for Maximum Wallpaper Visibility */}
+          <div className="absolute inset-0 bg-black/25" />
+          <div className="absolute inset-0 bg-gradient-to-r from-slate-950/70 via-slate-950/30 to-slate-950/15" />
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-slate-950/35" />
         </div>
 
         {/* Hero Content Grid */}
@@ -84,36 +86,36 @@ export default function HomePage() {
             
             {/* Left Hero Pitch */}
             <div className="lg:col-span-7 space-y-4 sm:space-y-6 text-left">
-              <div className="inline-flex items-center gap-1.5 sm:gap-2 bg-amber-500/10 border border-amber-500/30 text-amber-300 font-bold text-[11px] sm:text-xs px-3 sm:px-3.5 py-1.5 rounded-full backdrop-blur-md shadow-lg">
+              <div className="inline-flex items-center gap-1.5 sm:gap-2 bg-slate-950/35 border border-amber-500/40 text-amber-300 font-bold text-[11px] sm:text-xs px-3.5 py-1.5 rounded-full backdrop-blur-md shadow-lg">
                 <ShieldCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400 flex-shrink-0" />
-                <span>{BUSINESS_INFO.experienceYears} Years of Direct Interior Execution • Mumbai, Mumbra & Thane</span>
+                <span className="drop-shadow-sm">{BUSINESS_INFO.experienceYears} Years of Direct Interior Execution • Mumbai, Mumbra & Thane</span>
               </div>
 
-              <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-white tracking-tight leading-[1.15]">
+              <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-white tracking-tight leading-[1.15] drop-shadow-[0_4px_16px_rgba(0,0,0,0.85)]">
                 Interior Execution <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500">& Contracting</span>
               </h1>
 
-              <div className="text-amber-400 font-semibold text-sm sm:text-lg tracking-wide">
+              <div className="text-amber-300 font-bold text-sm sm:text-lg tracking-wide drop-shadow-md">
                 Directly Supervised. Professionally Executed. Zero Middlemen.
               </div>
 
-              <p className="text-slate-300 text-xs sm:text-base leading-relaxed max-w-2xl">
+              <p className="text-slate-100 text-xs sm:text-base leading-relaxed max-w-2xl drop-shadow-md">
                 Specializing in <strong>Residential & Commercial Interiors</strong> across <strong>Mumbai, Mumbra & Thane</strong>. From modular kitchens and custom carpentry to false ceilings, painting, and turnkey home renovations — with zero middleman markups.
               </p>
 
               {/* Verified Badges */}
               <div className="grid grid-cols-3 gap-2 sm:gap-3 pt-2">
-                <div className="border border-slate-800/90 bg-slate-900/80 p-2 sm:p-3 rounded-xl text-[10px] sm:text-xs flex flex-col sm:flex-row items-center gap-1 sm:gap-2.5 text-center sm:text-left backdrop-blur-md shadow-md">
+                <div className="border border-white/20 bg-slate-950/35 p-2 sm:p-3 rounded-xl text-[10px] sm:text-xs flex flex-col sm:flex-row items-center gap-1 sm:gap-2.5 text-center sm:text-left backdrop-blur-md shadow-lg">
                   <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400 flex-shrink-0" />
-                  <span className="font-semibold text-slate-200">Direct Execution</span>
+                  <span className="font-semibold text-slate-100">Direct Execution</span>
                 </div>
-                <div className="border border-slate-800/90 bg-slate-900/80 p-2 sm:p-3 rounded-xl text-[10px] sm:text-xs flex flex-col sm:flex-row items-center gap-1 sm:gap-2.5 text-center sm:text-left backdrop-blur-md shadow-md">
+                <div className="border border-white/20 bg-slate-950/35 p-2 sm:p-3 rounded-xl text-[10px] sm:text-xs flex flex-col sm:flex-row items-center gap-1 sm:gap-2.5 text-center sm:text-left backdrop-blur-md shadow-lg">
                   <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400 flex-shrink-0" />
-                  <span className="font-semibold text-slate-200">Fast Completion</span>
+                  <span className="font-semibold text-slate-100">Fast Completion</span>
                 </div>
-                <div className="border border-slate-800/90 bg-slate-900/80 p-2 sm:p-3 rounded-xl text-[10px] sm:text-xs flex flex-col sm:flex-row items-center gap-1 sm:gap-2.5 text-center sm:text-left backdrop-blur-md shadow-md">
+                <div className="border border-white/20 bg-slate-950/35 p-2 sm:p-3 rounded-xl text-[10px] sm:text-xs flex flex-col sm:flex-row items-center gap-1 sm:gap-2.5 text-center sm:text-left backdrop-blur-md shadow-lg">
                   <Hammer className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400 flex-shrink-0" />
-                  <span className="font-semibold text-slate-200">On-Site Supervision</span>
+                  <span className="font-semibold text-slate-100">On-Site Supervision</span>
                 </div>
               </div>
 
@@ -129,7 +131,7 @@ export default function HomePage() {
 
                 <a
                   href={`tel:${BUSINESS_INFO.phone}`}
-                  className="bg-slate-900/90 hover:bg-slate-800 text-white font-bold px-4 sm:px-5 py-3 sm:py-3.5 rounded-xl text-xs sm:text-sm transition-all border border-slate-700/80 flex items-center gap-2"
+                  className="bg-slate-950/50 hover:bg-slate-900 text-white font-bold px-4 sm:px-5 py-3 sm:py-3.5 rounded-xl text-xs sm:text-sm transition-all border border-white/20 backdrop-blur-md flex items-center gap-2 shadow-lg"
                 >
                   <Phone className="w-4 h-4 text-amber-400" />
                   <span>Call {BUSINESS_INFO.phone}</span>
@@ -147,32 +149,32 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Right Consultation Card */}
+            {/* Right Consultation Card (Soft & Transparent Glassmorphism) */}
             <div className="lg:col-span-5">
-              <div className="border border-slate-800/90 bg-slate-900/90 rounded-2xl sm:rounded-3xl p-4 sm:p-7 shadow-2xl backdrop-blur-xl space-y-3 sm:space-y-4">
-                <div className="flex items-center justify-between border-b border-slate-800 pb-2.5 sm:pb-3">
+              <div className="border border-white/20 bg-slate-950/35 rounded-2xl sm:rounded-3xl p-4 sm:p-7 shadow-2xl backdrop-blur-xl space-y-3 sm:space-y-4">
+                <div className="flex items-center justify-between border-b border-white/10 pb-2.5 sm:pb-3">
                   <span className="text-[11px] sm:text-xs font-bold text-amber-400 uppercase tracking-wider">
                     Quick Consultation
                   </span>
-                  <span className="text-[10px] text-slate-400 bg-slate-950 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded border border-slate-800">
+                  <span className="text-[10px] text-slate-200 bg-slate-900/80 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded border border-white/10">
                     Mumbai • Mumbra • Thane
                   </span>
                 </div>
                 <h3 className="text-base sm:text-xl font-extrabold text-white">Planning Interior Work?</h3>
-                <p className="text-xs text-slate-300 leading-relaxed">
+                <p className="text-xs text-slate-200 leading-relaxed">
                   Get direct advice from master contractor <strong>Naushad Chaudhary</strong>. We provide on-site measurements, authentic material samples, and fixed timeline commitments.
                 </p>
 
                 <div className="space-y-2 sm:space-y-2.5 pt-1">
-                  <div className="flex items-start gap-2 sm:gap-2.5 text-xs text-slate-300">
+                  <div className="flex items-start gap-2 sm:gap-2.5 text-xs text-slate-200">
                     <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400 flex-shrink-0 mt-0.5" />
                     <span>No middleman commission — direct contractor pricing</span>
                   </div>
-                  <div className="flex items-start gap-2 sm:gap-2.5 text-xs text-slate-300">
+                  <div className="flex items-start gap-2 sm:gap-2.5 text-xs text-slate-200">
                     <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400 flex-shrink-0 mt-0.5" />
                     <span>100% custom furniture, modular kitchen & ceilings</span>
                   </div>
-                  <div className="flex items-start gap-2 sm:gap-2.5 text-xs text-slate-300">
+                  <div className="flex items-start gap-2 sm:gap-2.5 text-xs text-slate-200">
                     <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400 flex-shrink-0 mt-0.5" />
                     <span>Clean work site management & polite team</span>
                   </div>
@@ -181,7 +183,7 @@ export default function HomePage() {
                 <div className="pt-2">
                   <Link
                     href="/estimate-calculator"
-                    className="w-full flex items-center justify-center gap-2 bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 font-bold py-2.5 sm:py-3 px-4 rounded-xl text-xs border border-amber-500/30 transition-all"
+                    className="w-full flex items-center justify-center gap-2 bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 font-bold py-2.5 sm:py-3 px-4 rounded-xl text-xs border border-amber-500/40 transition-all backdrop-blur-md"
                   >
                     <Calculator className="w-4 h-4" />
                     <span>Calculate Approximate Cost First →</span>
