@@ -2,10 +2,22 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Search, Filter, Phone, MessageCircle, MapPin, CheckCircle2, ArrowRight } from 'lucide-react';
+import { Search, Filter, Phone, MessageCircle, MapPin, CheckCircle2, ArrowRight, Loader2 } from 'lucide-react';
 
 const STATUS_LIST = [
   'ALL',
+  'NEW',
+  'CONTACTED',
+  'SITE_VISIT',
+  'MEASUREMENT',
+  'QUOTATION_SENT',
+  'NEGOTIATION',
+  'WON',
+  'LOST',
+  'ON_HOLD',
+];
+
+const EDITABLE_STATUSES = [
   'NEW',
   'CONTACTED',
   'SITE_VISIT',
@@ -22,6 +34,7 @@ export default function AdminLeadsPage() {
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [searchQuery, setSearchQuery] = useState('');
+  const [updatingId, setUpdatingId] = useState<string | null>(null);
 
   useEffect(() => {
     fetch('/api/leads')
@@ -31,6 +44,41 @@ export default function AdminLeadsPage() {
       })
       .finally(() => setLoading(false));
   }, []);
+
+  // Update Status Inline via API
+  const handleStatusChange = async (leadId: string, newStatus: string) => {
+    try {
+      setUpdatingId(leadId);
+      const res = await fetch(`/api/leads/${leadId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus }),
+      });
+
+      const data = await res.json();
+      if (res.ok && data.success !== false) {
+        setLeads((prev) =>
+          prev.map((l) => (l.id === leadId ? { ...l, status: newStatus } : l))
+        );
+      } else {
+        // Fallback for PUT if PATCH isn't configured
+        const putRes = await fetch(`/api/leads/${leadId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: newStatus }),
+        });
+        if (putRes.ok) {
+          setLeads((prev) =>
+            prev.map((l) => (l.id === leadId ? { ...l, status: newStatus } : l))
+          );
+        }
+      }
+    } catch (err) {
+      console.error('Failed to update lead status', err);
+    } finally {
+      setUpdatingId(null);
+    }
+  };
 
   const filteredLeads = leads.filter((lead) => {
     const matchesStatus = statusFilter === 'ALL' || lead.status === statusFilter;
@@ -175,11 +223,29 @@ export default function AdminLeadsPage() {
                       </div>
                     </td>
 
+                    {/* Inline Interactive Status Dropdown */}
                     <td className="p-3">
-                      <span className={`font-bold px-2.5 py-1 rounded text-[10px] border ${getStatusBadge(lead.status)}`}>
-                        {lead.status}
-                      </span>
+                      <div className="relative inline-flex items-center">
+                        <select
+                          value={lead.status}
+                          disabled={updatingId === lead.id}
+                          onChange={(e) => handleStatusChange(lead.id, e.target.value)}
+                          className={`cursor-pointer rounded-lg border px-2 py-1 text-[10px] font-bold focus:outline-none focus:ring-1 focus:ring-amber-500 transition-all ${getStatusBadge(
+                            lead.status
+                          )} bg-slate-950`}
+                        >
+                          {EDITABLE_STATUSES.map((st) => (
+                            <option key={st} value={st} className="bg-slate-900 text-slate-200">
+                              {st}
+                            </option>
+                          ))}
+                        </select>
+                        {updatingId === lead.id && (
+                          <Loader2 className="ml-1.5 w-3 h-3 text-amber-400 animate-spin flex-shrink-0" />
+                        )}
+                      </div>
                     </td>
+
                     <td className="p-3">
                       {lead.photos && lead.photos.length > 0 ? (
                         <span className="text-emerald-400 font-semibold">{lead.photos.length} uploaded</span>
