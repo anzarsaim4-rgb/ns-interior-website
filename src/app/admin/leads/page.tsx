@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Search, Filter, Phone, MapPin, CheckCircle2, ArrowRight } from 'lucide-react';
+import { Search, Filter, Phone, MessageCircle, MapPin, CheckCircle2, ArrowRight } from 'lucide-react';
 
 const STATUS_LIST = [
   'ALL',
@@ -37,12 +37,36 @@ export default function AdminLeadsPage() {
     const q = searchQuery.toLowerCase();
     const matchesSearch =
       !searchQuery ||
-      lead.leadCode.toLowerCase().includes(q) ||
-      lead.fullName.toLowerCase().includes(q) ||
-      lead.mobileNumber.toLowerCase().includes(q) ||
-      lead.location.toLowerCase().includes(q);
+      lead.leadCode?.toLowerCase().includes(q) ||
+      lead.fullName?.toLowerCase().includes(q) ||
+      lead.mobileNumber?.toLowerCase().includes(q) ||
+      lead.location?.toLowerCase().includes(q);
     return matchesStatus && matchesSearch;
   });
+
+  // Direct WhatsApp Helper
+  const getWhatsAppLink = (lead: any) => {
+    const cleanNumber = (lead.mobileNumber || '').replace(/\D/g, '');
+    const phoneWithCountry = cleanNumber.length === 10 ? `91${cleanNumber}` : cleanNumber;
+    const message = `Hello *${lead.fullName}*, this is *Naushad Chaudhary* from *N.S. INTERIOR* regarding your interior project inquiry (${lead.propertySize || lead.propertyType || 'Residential'} at ${lead.location || 'Mumbai/Mumbra/Thane'}). Would you like to schedule a physical site visit?`;
+    return `https://wa.me/${phoneWithCountry}?text=${encodeURIComponent(message)}`;
+  };
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'WON':
+        return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30';
+      case 'LOST':
+        return 'bg-rose-500/10 text-rose-400 border-rose-500/30';
+      case 'SITE_VISIT':
+      case 'MEASUREMENT':
+        return 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30';
+      case 'QUOTATION_SENT':
+        return 'bg-purple-500/10 text-purple-400 border-purple-500/30';
+      default:
+        return 'bg-amber-500/10 text-amber-400 border-amber-500/20';
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -53,7 +77,7 @@ export default function AdminLeadsPage() {
             Customer Lead Management
           </h1>
           <p className="text-xs text-slate-400 mt-1">
-            Track enquiry statuses, site visit bookings, and quotation conversions.
+            Track customer inquiries, trigger direct WhatsApp follow-ups, and manage site visits.
           </p>
         </div>
       </div>
@@ -78,6 +102,7 @@ export default function AdminLeadsPage() {
           <div className="flex gap-1.5">
             {STATUS_LIST.map((st) => (
               <button
+                type="button"
                 key={st}
                 onClick={() => setStatusFilter(st)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-colors ${
@@ -107,25 +132,51 @@ export default function AdminLeadsPage() {
               <thead className="bg-slate-950 text-slate-400 uppercase text-[10px] font-bold">
                 <tr>
                   <th className="p-3">Ref ID</th>
-                  <th className="p-3">Name</th>
+                  <th className="p-3">Client</th>
                   <th className="p-3">Location</th>
                   <th className="p-3">Property</th>
-                  <th className="p-3">Mobile</th>
+                  <th className="p-3">Quick Connect</th>
                   <th className="p-3">Status</th>
                   <th className="p-3">Photos</th>
-                  <th className="p-3">Action</th>
+                  <th className="p-3 text-right">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800 text-slate-300">
                 {filteredLeads.map((lead) => (
-                  <tr key={lead.id} className="hover:bg-slate-850">
+                  <tr key={lead.id} className="hover:bg-slate-800/50 transition-colors">
                     <td className="p-3 font-mono font-bold text-amber-400">{lead.leadCode}</td>
-                    <td className="p-3 font-semibold text-white">{lead.fullName}</td>
-                    <td className="p-3">{lead.location}</td>
-                    <td className="p-3">{lead.propertySize || lead.propertyType}</td>
-                    <td className="p-3 font-mono">{lead.mobileNumber}</td>
                     <td className="p-3">
-                      <span className="bg-amber-500/10 text-amber-400 font-bold px-2.5 py-1 rounded text-[10px] border border-amber-500/20">
+                      <div className="font-semibold text-white">{lead.fullName}</div>
+                      <div className="text-[10px] text-slate-400 font-mono">{lead.mobileNumber}</div>
+                    </td>
+                    <td className="p-3">{lead.location}</td>
+                    <td className="p-3">{lead.propertySize || lead.propertyType || 'N/A'}</td>
+                    
+                    {/* Quick Follow-up Buttons */}
+                    <td className="p-3">
+                      <div className="flex items-center gap-2">
+                        <a
+                          href={getWhatsAppLink(lead)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          title="Open WhatsApp Chat"
+                          className="flex items-center gap-1 bg-emerald-950/60 hover:bg-emerald-900 text-emerald-400 border border-emerald-500/30 px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-colors"
+                        >
+                          <MessageCircle className="w-3.5 h-3.5" />
+                          <span>WhatsApp</span>
+                        </a>
+                        <a
+                          href={`tel:${lead.mobileNumber}`}
+                          title="Direct Call"
+                          className="bg-slate-800 hover:bg-slate-700 text-slate-300 p-1.5 rounded-lg border border-slate-700 transition-colors"
+                        >
+                          <Phone className="w-3.5 h-3.5 text-amber-400" />
+                        </a>
+                      </div>
+                    </td>
+
+                    <td className="p-3">
+                      <span className={`font-bold px-2.5 py-1 rounded text-[10px] border ${getStatusBadge(lead.status)}`}>
                         {lead.status}
                       </span>
                     </td>
@@ -136,12 +187,13 @@ export default function AdminLeadsPage() {
                         <span className="text-slate-500">None</span>
                       )}
                     </td>
-                    <td className="p-3">
+                    <td className="p-3 text-right">
                       <Link
                         href={`/admin/leads/${lead.id}`}
-                        className="bg-slate-800 hover:bg-amber-500 hover:text-slate-950 text-slate-200 font-bold px-3 py-1.5 rounded-lg text-xs transition-colors inline-block"
+                        className="bg-slate-800 hover:bg-amber-500 hover:text-slate-950 text-slate-200 font-bold px-3 py-1.5 rounded-lg text-xs transition-colors inline-flex items-center gap-1"
                       >
-                        Open Dossier →
+                        <span>Dossier</span>
+                        <ArrowRight className="w-3 h-3" />
                       </Link>
                     </td>
                   </tr>

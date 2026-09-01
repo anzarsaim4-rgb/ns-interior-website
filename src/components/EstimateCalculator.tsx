@@ -3,8 +3,10 @@
 import React, { useState, useMemo } from 'react';
 import { calculateEstimate, DEFAULT_RATES, QUALITY_MULTIPLIERS } from '@/lib/estimate';
 import { BHK_OPTIONS, PROPERTY_TYPES } from '@/lib/constants';
-import { Calculator, AlertTriangle, CheckCircle2, ArrowRight, ShieldAlert } from 'lucide-react';
+import { Calculator, AlertTriangle, CheckCircle2, ArrowRight, ShieldAlert, Download, Share2 } from 'lucide-react';
 import Link from 'next/link';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 export default function EstimateCalculator() {
   const [propertyType, setPropertyType] = useState('Residential Apartment');
@@ -17,6 +19,7 @@ export default function EstimateCalculator() {
     'false-ceiling',
     'painting',
   ]);
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
 
   const result = useMemo(() => {
     return calculateEstimate({
@@ -30,7 +33,7 @@ export default function EstimateCalculator() {
 
   const toggleService = (slug: string) => {
     if (selectedServices.includes(slug)) {
-      if (selectedServices.length === 1) return; // keep at least 1
+      if (selectedServices.length === 1) return;
       setSelectedServices(selectedServices.filter((s) => s !== slug));
     } else {
       setSelectedServices([...selectedServices, slug]);
@@ -43,6 +46,187 @@ export default function EstimateCalculator() {
       currency: 'INR',
       maximumFractionDigits: 0,
     }).format(amount);
+  };
+
+  // 1. Generate Branded PDF Quotation
+  // 1. Generate Luxury Branded PDF Quotation
+  const handleDownloadPDF = () => {
+    try {
+      setIsGeneratingPdf(true);
+      const doc = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4',
+      });
+
+      // --- Background Theme Accents ---
+      doc.setFillColor(10, 15, 29); // Premium Dark Navy
+      doc.rect(0, 0, 210, 48, 'F');
+
+      // Top Gold Accent Bar
+      doc.setFillColor(217, 119, 6); // Amber Gold
+      doc.rect(0, 0, 210, 3, 'F');
+
+      // --- Header Brand ---
+      doc.setTextColor(245, 158, 11);
+      doc.setFontSize(22);
+      doc.setFont('helvetica', 'bold');
+      doc.text('N.S. INTERIOR', 14, 18);
+
+      doc.setFontSize(8.5);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(226, 232, 240);
+      doc.text('DIRECT INTERIOR EXECUTION & CONTRACTING', 14, 25);
+
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(148, 163, 184);
+      doc.text('Prop: Naushad Chaudhary | Master Contractor', 14, 32);
+      doc.text('Tihama Complex, Kausa Talaw Pali Road, Kausa Mumbra - 400612', 14, 37);
+      doc.text('Direct Call & WhatsApp: +91 6391916867 | Mumbai - Mumbra - Thane', 14, 42);
+
+      // --- Quotation Meta Details Card ---
+      doc.setFillColor(248, 250, 252);
+      doc.roundedRect(14, 54, 108, 36, 2, 2, 'F');
+      doc.setDrawColor(226, 232, 240);
+      doc.roundedRect(14, 54, 108, 36, 2, 2, 'D');
+
+      doc.setTextColor(15, 23, 42);
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'bold');
+      doc.text('PROJECT ESTIMATE SPECIFICATION', 18, 62);
+
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(71, 85, 105);
+      doc.text(`Generated Date : ${new Date().toLocaleDateString('en-IN')}`, 18, 69);
+      doc.text(`Property Type   : ${propertyType} (${bhk})`, 18, 75);
+      doc.text(`Carpet Area      : ${approxArea} Sq.Ft.`, 18, 81);
+      doc.text(`Finish Grade     : ${qualityFinish.toUpperCase()}`, 18, 87);
+
+      // --- Total Budget Range Card ---
+      doc.setFillColor(254, 243, 199); // Light Amber Tint
+      doc.roundedRect(126, 54, 70, 36, 2, 2, 'F');
+      doc.setDrawColor(245, 158, 11);
+      doc.roundedRect(126, 54, 70, 36, 2, 2, 'D');
+
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(180, 83, 9);
+      doc.text('CALCULATED BUDGET RANGE', 131, 62);
+
+      // Clean ASCII Price Rendering (Avoids encoding bugs)
+      const formattedMin = `Rs. ${result.minTotal.toLocaleString('en-IN')}`;
+      const formattedMax = `Rs. ${result.maxTotal.toLocaleString('en-IN')}`;
+
+      doc.setFontSize(10.5);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(15, 23, 42);
+      doc.text(`${formattedMin}`, 131, 72);
+      doc.text(`to ${formattedMax}`, 131, 79);
+
+      doc.setFontSize(6.5);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(120, 53, 15);
+      doc.text('*Excluding structural civil changes', 131, 86);
+
+      // --- Itemized Cost Breakdown Table ---
+      const tableData = result.breakdown.map((item, idx) => [
+        idx + 1,
+        item.serviceName,
+        qualityFinish.toUpperCase(),
+        `Rs. ${item.minCost.toLocaleString('en-IN')} - Rs. ${item.maxCost.toLocaleString('en-IN')}`,
+      ]);
+
+      autoTable(doc, {
+        startY: 96,
+        head: [['#', 'Execution Scope / Service Item', 'Finish Level', 'Approx Cost Range']],
+        body: tableData,
+        theme: 'striped',
+        headStyles: {
+          fillColor: [10, 15, 29],
+          textColor: [245, 158, 11],
+          fontStyle: 'bold',
+          fontSize: 8.5,
+          cellPadding: 3.5,
+        },
+        bodyStyles: {
+          textColor: [30, 41, 59],
+          fontSize: 8,
+          cellPadding: 3,
+        },
+        alternateRowStyles: {
+          fillColor: [248, 250, 252],
+        },
+        columnStyles: {
+          0: { cellWidth: 10, halign: 'center' },
+          1: { cellWidth: 80 },
+          2: { cellWidth: 32, halign: 'center' },
+          3: { cellWidth: 60, halign: 'right', fontStyle: 'bold' },
+        },
+      });
+
+      const finalY = (doc as any).lastAutoTable?.finalY || 190;
+
+      // --- Disclaimer Box ---
+      doc.setFillColor(255, 251, 235);
+      doc.roundedRect(14, finalY + 8, 182, 22, 1.5, 1.5, 'F');
+      doc.setDrawColor(252, 211, 77);
+      doc.roundedRect(14, finalY + 8, 182, 22, 1.5, 1.5, 'D');
+
+      doc.setFontSize(7.5);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(180, 83, 9);
+      doc.text('IMPORTANT TERMS & DISCLAIMER', 18, finalY + 14);
+
+      doc.setFontSize(6.8);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(100, 116, 139);
+      const disclaimerLines = doc.splitTextToSize(
+        result.disclaimer || 'Approximate estimate only. Final cost will be finalized after on-site physical measurement, laminate brand selection, and hardware requirements.',
+        174
+      );
+      doc.text(disclaimerLines, 18, finalY + 19);
+
+      // --- Page Footer & Signature Info ---
+      doc.setDrawColor(226, 232, 240);
+      doc.line(14, 275, 196, 275);
+
+      doc.setFontSize(7.5);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(15, 23, 42);
+      doc.text('N.S. INTERIOR — Contractor Execution Hub', 14, 281);
+
+      doc.setFontSize(7);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(100, 116, 139);
+      doc.text('Visit our workshop: Kausa Mumbra | Call/WhatsApp: +91 6391916867', 14, 286);
+
+      doc.setFont('helvetica', 'italic');
+      doc.text('Authorised by Naushad Chaudhary', 150, 286);
+
+      // Save Document
+      doc.save(`NS-Interior-Quotation-${approxArea}sqft-${bhk.replace(/\s+/g, '')}.pdf`);
+    } catch (err) {
+      console.error('Failed to generate PDF quote', err);
+    } finally {
+      setIsGeneratingPdf(false);
+    }
+  };
+
+  // 2. Share Quotation Directly to WhatsApp
+  const handleShareWhatsApp = () => {
+    const message = `*N.S. INTERIOR - Estimate Inquiry* 🏛️%0A%0A` +
+      `*Property:* ${encodeURIComponent(propertyType)} (${encodeURIComponent(bhk)})%0A` +
+      `*Area:* ${approxArea} Sq.Ft.%0A` +
+      `*Finish Grade:* ${qualityFinish.toUpperCase()}%0A` +
+      `*Estimated Range:* ${encodeURIComponent(formatRupees(result.minTotal))} - ${encodeURIComponent(formatRupees(result.maxTotal))}%0A%0A` +
+      `*Selected Services:*%0A` +
+      result.breakdown.map((b) => `• ${encodeURIComponent(b.serviceName)}`).join('%0A') +
+      `%0A%0APlease schedule a site visit with sample catalogues.`;
+
+    const whatsappUrl = `https://wa.me/916391916867?text=${message}`;
+    window.open(whatsappUrl, '_blank');
   };
 
   return (
@@ -229,7 +413,29 @@ export default function EstimateCalculator() {
             </div>
           </div>
 
+          {/* Action Buttons */}
           <div className="space-y-3 pt-4 border-t border-slate-800">
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={handleDownloadPDF}
+                disabled={isGeneratingPdf}
+                className="flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-700 font-semibold py-2.5 px-3 rounded-xl text-xs transition-colors disabled:opacity-50"
+              >
+                <Download className="w-3.5 h-3.5 text-amber-400" />
+                <span>{isGeneratingPdf ? 'Generating...' : 'Download PDF'}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleShareWhatsApp}
+                className="flex items-center justify-center gap-2 bg-emerald-950/40 hover:bg-emerald-900/50 text-emerald-300 border border-emerald-500/40 font-semibold py-2.5 px-3 rounded-xl text-xs transition-colors"
+              >
+                <Share2 className="w-3.5 h-3.5 text-emerald-400" />
+                <span>WhatsApp Quote</span>
+              </button>
+            </div>
+
             <Link
               href={`/enquiry?area=${approxArea}&bhk=${encodeURIComponent(bhk)}`}
               className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black py-3.5 px-4 rounded-xl text-sm transition-all shadow-xl"
@@ -237,6 +443,7 @@ export default function EstimateCalculator() {
               <span>Request Site Visit with This Estimate</span>
               <ArrowRight className="w-4 h-4" />
             </Link>
+
             <p className="text-[10px] text-slate-400 text-center">
               Our master contractor will bring physical laminate catalogues and sample boards during site visit.
             </p>
