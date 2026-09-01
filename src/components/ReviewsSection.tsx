@@ -68,16 +68,16 @@ const REVIEWS_DATA: Review[] = [
 
 export default function ReviewsSection() {
   return (
-    <section className="py-14 sm:py-20 border-t border-slate-800 bg-slate-950/60">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+    <section className="py-10 sm:py-20 border-t border-slate-800 bg-slate-950/60">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 sm:space-y-10">
         
         {/* Header Title */}
-        <div className="text-center max-w-3xl mx-auto space-y-3">
+        <div className="text-center max-w-3xl mx-auto space-y-2.5">
           <div className="inline-flex items-center gap-2 text-xs font-bold text-amber-400 bg-amber-500/10 px-3.5 py-1.5 rounded-full border border-amber-500/20">
             <CheckCircle2 className="w-3.5 h-3.5" />
             Verified Client Feedback
           </div>
-          <h2 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
+          <h2 className="text-2xl sm:text-4xl font-black text-white tracking-tight">
             Trusted by Homeowners Across Mumbai, Mumbra & Thane
           </h2>
           <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
@@ -85,20 +85,20 @@ export default function ReviewsSection() {
           </p>
         </div>
 
-        {/* Reviews Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* Reviews Cards: Mobile Horizontal Swipe Carousel + Desktop Grid */}
+        <div className="flex md:grid md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 overflow-x-auto md:overflow-visible pb-4 md:pb-0 snap-x snap-mandatory">
           {REVIEWS_DATA.map((review) => (
             <div
               key={review.id}
-              className="bg-slate-900/80 border border-slate-800 hover:border-amber-500/40 rounded-2xl p-6 flex flex-col justify-between space-y-5 transition duration-300 hover:-translate-y-1 shadow-xl relative"
+              className="min-w-[285px] sm:min-w-[320px] md:min-w-0 flex-shrink-0 md:flex-shrink snap-center bg-slate-900/80 border border-slate-800 hover:border-amber-500/40 rounded-2xl p-5 sm:p-6 flex flex-col justify-between space-y-4 sm:space-y-5 transition duration-300 hover:-translate-y-1 shadow-xl relative"
             >
-              <Quote className="absolute top-5 right-5 w-8 h-8 text-slate-800/80 pointer-events-none" />
+              <Quote className="absolute top-5 right-5 w-7 h-7 sm:w-8 sm:h-8 text-slate-800/80 pointer-events-none" />
 
               <div className="space-y-3">
                 {/* 5 Stars */}
                 <div className="flex items-center gap-1 text-amber-400">
                   {Array.from({ length: review.rating }).map((_, i) => (
-                    <Star key={i} className="w-4 h-4 fill-amber-400" />
+                    <Star key={i} className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-amber-400" />
                   ))}
                 </div>
 
@@ -109,7 +109,7 @@ export default function ReviewsSection() {
               </div>
 
               {/* Client Info & Tag */}
-              <div className="pt-4 border-t border-slate-800/80 space-y-1.5">
+              <div className="pt-3 sm:pt-4 border-t border-slate-800/80 space-y-1.5">
                 <div className="flex items-center justify-between">
                   <h4 className="text-xs font-bold text-white">{review.name}</h4>
                   <span className="text-[10px] text-slate-500 font-mono">{review.date}</span>
